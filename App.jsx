@@ -1967,12 +1967,13 @@ export default function App() {
   // ── Guardar todo en Firebase ───────────────────────────────────────────────
   async function guardarEnFirebase(nuevoJugadores, nuevasEval, nuevoEvalData) {
     try {
-      await fbSet("cancunfc", "plantel", {
-        jugadores:    nuevoJugadores  ?? jugadores,
-        evaluaciones: nuevasEval      ?? evaluaciones,
-        evalData:     nuevoEvalData   ?? evalData,
+      const payload = {
+        jugadores:    nuevoJugadores  !== null ? nuevoJugadores  : jugadores,
+        evaluaciones: nuevasEval      !== null ? nuevasEval      : evaluaciones,
+        evalData:     nuevoEvalData   !== null ? nuevoEvalData   : evalData,
         updatedAt:    new Date().toISOString(),
-      });
+      };
+      await fbSet("cancunfc", "plantel", payload);
     } catch(e) { console.error("Error guardando:", e); }
   }
 
@@ -2011,7 +2012,7 @@ export default function App() {
     setJugadores(nuevosJ);
     setEvaluaciones(nuevasE);
     setJugador(nuevo);
-    guardarEnFirebase(nuevosJ, nuevasE, null);
+    guardarEnFirebase(nuevosJ, nuevasE, evalData);
     setTimeout(() => {
       if (areaIdPrev) {
         setAreaId(areaIdPrev);
@@ -2029,13 +2030,13 @@ export default function App() {
     if (!jId) return;
     const nuevas = { ...evaluaciones, [jId]: { ...(evaluaciones[jId]||{}), ["p"+paso]: true } };
     setEvaluaciones(nuevas);
-    guardarEnFirebase(null, nuevas, null);
+    guardarEnFirebase(jugadores, nuevas, evalData);
   }
   function saveEvalData(jId, paso, data) {
     if (!jId) return;
     const nuevos = { ...evalData, [jId]: { ...(evalData[jId]||{}), ["p"+paso]: data } };
     setEvalData(nuevos);
-    guardarEnFirebase(null, null, nuevos);
+    guardarEnFirebase(jugadores, evaluaciones, nuevos);
   }
   const ctx = { onHome:goHome, onBack:()=>setScreen("players"), area, evaluador:sesion?.evaluador||"", selfie:sesion?.selfie||null, jugador, onGuardarJugador:handleGuardarJugador, markPasoCompleto, saveEvalData, evalData };
 
